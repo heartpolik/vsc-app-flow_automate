@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
 import { getCurrentBranchName } from './lib/git';
-import { createMergeRequest } from './lib/gitlab';
+import { createMergeRequest, debugg } from './lib/gitlab';
 import { postToJira } from './lib/jira';
+import { mergeRequestHandler } from './handlers';
+import { MergeTarget } from './lib/types';
 
 export function activate(context: vscode.ExtensionContext) {
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -15,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     const selection = await vscode.window.showQuickPick(
       [
         { label: '🔴 MR → prod', action: 'mr2prod' },
+        { label: '🔴 Commit && MR → prod', action: 'cmr2prod' },
         { label: '🟡 MR → stage', action: 'mr2stage' },
         { label: '⚙️ Settings', action: 'settings' },
       ],
@@ -24,6 +27,10 @@ export function activate(context: vscode.ExtensionContext) {
     if (!selection) return;
 
     switch (selection.action) {
+      case 'cmr2prod':
+        vscode.commands.executeCommand('extension.commitForProd');
+        vscode.commands.executeCommand('extension.createMrProd');
+        break;
       case 'mr2prod':
         vscode.commands.executeCommand('extension.createMrProd');
         break;
@@ -39,12 +46,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   const createMrProd = vscode.commands.registerCommand('extension.createMrProd', async () => {
     vscode.window.showInformationMessage('Створення MR у prod...');
-    // тут твоя логіка створення MR у prod
+    await mergeRequestHandler(MergeTarget.Prod);
   });
 
   const createMrStage = vscode.commands.registerCommand('extension.createMrStage', async () => {
-    vscode.window.showInformationMessage('Створення MR у stage...');
-    // тут твоя логіка створення MR у stage
+    await mergeRequestHandler(MergeTarget.Stage);
   });
 
   context.subscriptions.push(createMrProd, createMrStage);
