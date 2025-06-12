@@ -1,0 +1,92 @@
+{
+  "name": "flow-automate",
+  "displayName": "Flow automate",
+  "description": "VS Code extension для створення MR і посту в Jira",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "dist/extension.js",
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "pretest": "npm run compile",
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.70.0",
+    "@vscode/test-electron": "^2.5.2",
+    "mocha": "^11.6.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "simple-git": "^3.20.0"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Flow automate",
+      "properties": {
+        "flowAutomate.gitlabUrl": {
+          "type": "string",
+          "default": "https://gitlab.com/api/v4",
+          "description": "URL GitLab API"
+        },
+        "flowAutomate.gitlabToken": {
+          "type": "string",
+          "default": "",
+          "description": "GitLab Private Token",
+          "secret": true
+        },
+        "flowAutomate.branchProd": {
+          "type": "string",
+          "default": "prod",
+          "description": "Production branch name"
+        },
+        "flowAutomate.branchStage": {
+          "type": "string",
+          "default": "stage",
+          "description": "Stage (pre prod) branch name"
+        },
+
+        "flowAutomate.jiraUrl": {
+          "type": "string",
+          "default": "",
+          "description": "URL Jira"
+        },
+        "flowAutomate.jiraEmail": {
+          "type": "string",
+          "default": "",
+          "description": "Email користувача Jira"
+        },
+        "flowAutomate.jiraToken": {
+          "type": "string",
+          "default": "",
+          "description": "API Token Jira",
+          "secret": true
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "extension.menu",
+        "title": "Flow automate меню"
+      },
+      {
+        "command": "extension.createMrProd",
+        "title": "Створити Merge Request у prod"
+      },
+      {
+        "command": "extension.createMrStage",
+        "title": "Створити Merge Request у stage"
+      }
+    ]
+  }
+}
