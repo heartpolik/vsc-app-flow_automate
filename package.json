@@ -18,9 +18,11 @@
   },
   "icon": "media/icon.png",
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:flowAutomate.start",
+    "workspaceContains:.git"
   ],
-  "main": "dist/extension.js",
+  "main": "./dist/extension.js",
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "pretest": "npm run compile",
