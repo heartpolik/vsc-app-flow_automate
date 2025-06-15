@@ -3,6 +3,15 @@
   "displayName": "Flow automate",
   "description": "VS Code extension для створення MR і посту в Jira",
   "version": "0.0.1",
+  "publisher": "hrt-plk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heartpolik/vsc-app-flow_automate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/heartpolik/vsc-app-flow_automate/issues"
+  },
+  "homepage": "https://github.com/heartpolik/vsc-app-flow_automate/blob/master/README.md",
   "engines": {
     "vscode": "^1.70.0"
   },
