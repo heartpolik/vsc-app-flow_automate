@@ -27,6 +27,7 @@
     "vscode:prepublish": "tsc -p ./",
     "pretest": "npm run compile",
     "compile": "tsc",
+    "bundle": "node esbuild.js",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "test": "node ./out/test/runTest.js"
