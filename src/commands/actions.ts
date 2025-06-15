@@ -9,7 +9,7 @@ export const actions = {
         title: 'Налаштування розширення',
         icon: new vscode.ThemeIcon('extensions-manage', new vscode.ThemeColor('charts.green')),
         action: async () => {
-            await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:flowAutomate');
+            await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:hrt-plk.flow-automate');
         },
     },
 
