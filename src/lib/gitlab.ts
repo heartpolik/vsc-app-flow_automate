@@ -1,68 +1,80 @@
-import axios from 'axios';
 import * as vscode from 'vscode';
-import { promisify } from 'util';
-import { exec } from 'child_process';
-import { getGitRemoteUrl } from './git';
+import { getCurrentBranchName } from './git';
+import { SimpleGit } from 'simple-git';
+import { Gitlab } from '@gitbeaker/rest';
+import { Config } from '../Config';
 
-const execAsync = promisify(exec);
-
-const config = vscode.workspace.getConfiguration('flowAutomate');
-const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? process.cwd();
-
+export type mrResponce = {
+  url: string;
+  sourceBranch: string;
+  targetBranch: string;
+  repoName: string;
+}
 /**
  * Створює merge request
  */
-export async function createMergeRequest(sourceBranch: string, targetBranch: string, isProduction = false): Promise<string> {
-  
-  const gitlabUrl = config.get<string>('gitlabUrl')!;
-  const token = config.get<string>('gitlabToken')!;
+export async function createMergeRequest(repo: SimpleGit, targetBranch: string, isProduction = false): Promise<mrResponce> {
+  const currentBranch = await getCurrentBranchName(repo);
+  if (!currentBranch || currentBranch === targetBranch) {
+    throw new Error(`Fail to create MR ${currentBranch}->${targetBranch}`);
+  }
 
-  const projectId = await resolveGitLabProjectId(gitlabUrl, token);
+  const origin = await repo.remote(['get-url', 'origin']);
+  if (!origin) throw new Error('Unable to resolve origin URL');
 
-  const url = `${gitlabUrl}/api/v4/projects/${projectId}/merge_requests`;
+  const projectId = await resolveGitLabProjectId(origin);
 
-  const response = await axios.post(
-    url,
-    {
-      source_branch: sourceBranch,
-      target_branch: targetBranch,
-      title: `Merge ${sourceBranch} into ${targetBranch}`,
-      remove_source_branch: !isProduction,
-      squash: isProduction
-    },
-    {
-      headers: {
-        'PRIVATE-TOKEN': token
-      }
+  // 🛠 Перевірка: чи поточна гілка запушена
+  const remoteBranches = await repo.branch(['-r']);
+  const remoteBranchFullName = `origin/${currentBranch}`;
+  if (!remoteBranches.all.includes(remoteBranchFullName)) {
+    const confirm = await vscode.window.showWarningMessage(
+      `Гілка '${currentBranch}' ще не запушена. Запушити зараз?`,
+      'Так', 'Скасувати'
+    );
+    if (confirm !== 'Так') throw new Error('Створення MR скасовано користувачем');
+
+    await repo.push(['-u', 'origin', currentBranch]);
+  }
+
+  try {
+    const api = new Gitlab({
+      host: Config.read.gitlabUrl,
+      token: Config.read.gitlabToken,
+    });
+    const repoName = (await api.Projects.show(projectId)).name;
+    const mr = await api.MergeRequests.create(projectId, currentBranch, targetBranch, `Merge ${currentBranch} into ${targetBranch}`, {
+      removeSourceBranch: !isProduction,
+      squash: isProduction,
+    });
+
+    return {
+      url: mr.web_url,
+      sourceBranch: currentBranch,
+      targetBranch,
+      repoName,
+    };
+  } catch (error: any) {
+    if (error.response?.status === 400) {
+      throw new Error('MR already exists');
+    } else {
+      throw new Error(`GitLab API error: ${error.message}`);
     }
-  );
-
-  return response.data.web_url;
+  }
 }
 
 /**
  * Визначає project ID GitLab проєкту автоматично
  */
-async function resolveGitLabProjectId(gitlabUrl: string, token: string): Promise<number> {
-  const origin = await getGitRemoteUrl();
+async function resolveGitLabProjectId(origin: string): Promise<number> {
   const match = origin.trim().match(/[:\/]([^\/:]+\/[^\/.]+)(?:\.git)?$/);
-
-  console.log(match);
   if (!match || !match[1]) {
     throw new Error('Не вдалося визначити GitLab remote path із URL: ' + origin);
   }
-  const url = `${gitlabUrl}/api/v4/projects/${encodeURIComponent(match[1])}`;
-
-  const response = await axios.get(url, {
-    headers: {
-      'PRIVATE-TOKEN': token
-    }
+  const api = new Gitlab({
+    host: Config.read.gitlabUrl,
+    token: Config.read.gitlabToken,
   });
-
-  return response.data.id;
+  const project = await api.Projects.show(match[1]);
+  return project.id;
 }
-
-export async function debugg() {
-  console.log(await resolveGitLabProjectId(config.get<string>('gitlabUrl')!, config.get<string>('gitlabToken')!));
-}
-

@@ -27,10 +27,58 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@gitbeaker/rest": "^42.5.0",
     "axios": "^1.6.0",
     "simple-git": "^3.20.0"
   },
   "contributes": {
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "flowAutomate.refreshRepo",
+          "when": "view == reposList && viewItem == gitRepo",
+          "group": "context"
+        },
+        {
+          "command": "flowAutomate.openInTerminal",
+          "when": "view == reposList && viewItem == gitRepo",
+          "group": "context"
+        },
+        {
+          "command": "flowAutomate.mr2prod",
+          "when": "view == reposList && viewItem == gitRepo",
+          "group": "inline"
+        },
+        {
+          "command": "flowAutomate.mr2stage",
+          "when": "view == reposList && viewItem == gitRepo",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "flowAutomate",
+          "title": "Flow helper",
+          "icon": "media/git.svg"
+        }
+      ]
+    },
+    "views": {
+      "flowAutomate": [
+        {
+          "id": "reposList",
+          "name": "Git Repositories",
+          "icon": "media/git.svg"
+        },
+        {
+          "id": "actionsList",
+          "name": "Actions",
+          "icon": "media/git.svg"
+        }
+      ]
+    },
     "configuration": {
       "title": "Flow automate",
       "properties": {
@@ -55,7 +103,6 @@
           "default": "stage",
           "description": "Stage (pre prod) branch name"
         },
-
         "flowAutomate.jiraUrl": {
           "type": "string",
           "default": "",
@@ -69,23 +116,41 @@
         "flowAutomate.jiraToken": {
           "type": "string",
           "default": "",
-          "description": "API Token Jira",
+          "description": "API Token Jira (https://id.atlassian.com/manage-profile/security/api-tokens)",
+          "secret": true
+        },
+        "flowAutomate.jiraSectionName": {
+          "type": "string",
+          "default": "🔧 Деталі реалізації",
+          "description": "Назва для розділу в задачі",
           "secret": true
         }
       }
     },
     "commands": [
       {
-        "command": "extension.menu",
-        "title": "Flow automate меню"
+        "command": "flowAutomate.refreshRepo",
+        "title": "🔄 Оновити статус"
       },
       {
-        "command": "extension.createMrProd",
-        "title": "Створити Merge Request у prod"
+        "command": "flowAutomate.openInTerminal",
+        "title": "🖥 Відкрити в терміналі"
       },
       {
-        "command": "extension.createMrStage",
-        "title": "Створити Merge Request у stage"
+        "command": "flowAutomate.mr2prod",
+        "title": "📕 MR -> prod"
+      },
+      {
+        "command": "flowAutomate.mr2stage",
+        "title": "📗 MR -> stage"
+      },
+      {
+        "command": "flowAutomate.debug",
+        "title": "🪲 debug"
+      },
+      {
+        "command": "flowAutomate.runCommand",
+        "title": "▶️ Виконати команду"
       }
     ]
   }

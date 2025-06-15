@@ -1,60 +1,55 @@
 import * as vscode from 'vscode';
-import { getCurrentBranchName } from './lib/git';
-import { createMergeRequest, debugg } from './lib/gitlab';
-import { postToJira } from './lib/jira';
-import { mergeRequestHandler } from './handlers';
+import { mergeRequestHandler, debug } from './handlers';
 import { MergeTarget } from './lib/types';
+import { GitRepoProvider } from './tree/GitRepoProvider';
+import { CommandProvider } from './tree/CommandProvider';
+import { CommandItem } from './tree/CommandItem';
+import { actions } from './commands/actions';
+import { GitRepoItem } from './tree/GitRepoItem';
+import { Config } from './Config';
 
 export function activate(context: vscode.ExtensionContext) {
-  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-  statusBarItem.text = '🦊';
-  statusBarItem.tooltip = 'Flow automate меню';
-  statusBarItem.command = 'extension.menu';
-  statusBarItem.show();
-  context.subscriptions.push(statusBarItem);
-
-  const menuCommand = vscode.commands.registerCommand('extension.menu', async () => {
-    const selection = await vscode.window.showQuickPick(
-      [
-        { label: '🔴 MR → prod', action: 'mr2prod' },
-        { label: '🔴 Commit && MR → prod', action: 'cmr2prod' },
-        { label: '🟡 MR → stage', action: 'mr2stage' },
-        { label: '⚙️ Settings', action: 'settings' },
-      ],
-      { placeHolder: 'Оберіть дію' }
-    );
-
-    if (!selection) return;
-
-    switch (selection.action) {
-      case 'cmr2prod':
-        vscode.commands.executeCommand('extension.commitForProd');
-        vscode.commands.executeCommand('extension.createMrProd');
-        break;
-      case 'mr2prod':
-        vscode.commands.executeCommand('extension.createMrProd');
-        break;
-      case 'mr2stage':
-        vscode.commands.executeCommand('extension.createMrStage');
-        break;
-      case 'settings':
-        vscode.commands.executeCommand('workbench.action.openSettings', '@ext:flowAutomate');
-        break;
+  vscode.workspace.onDidChangeConfiguration(event => {
+    if (event.affectsConfiguration('flowAutomate')) {
+      Config.init();
     }
   });
-  context.subscriptions.push(menuCommand);
+  const repoProvider = new GitRepoProvider();
+  vscode.window.registerTreeDataProvider('reposList', repoProvider);
+  const cmdProvider = new CommandProvider(actions);
+  vscode.window.registerTreeDataProvider('actionsList', cmdProvider);
 
-  const createMrProd = vscode.commands.registerCommand('extension.createMrProd', async () => {
-    vscode.window.showInformationMessage('Створення MR у prod...');
-    await mergeRequestHandler(MergeTarget.Prod);
+  const refreshCmd = vscode.commands.registerCommand('flowAutomate.refreshGitRepos', () => {
+    repoProvider.refresh();
   });
 
-  const createMrStage = vscode.commands.registerCommand('extension.createMrStage', async () => {
-    await mergeRequestHandler(MergeTarget.Stage);
-  });
+  const commands = [
+    vscode.commands.registerCommand('flowAutomate.refreshRepo', (item: GitRepoItem) => {
+      vscode.window.showInformationMessage(`Оновлення репо: ${item.repoPath}`);
+      // TODO: refresh logic
+    }),
+    vscode.commands.registerCommand('flowAutomate.openInTerminal', (item: GitRepoItem) => {
+      vscode.window.createTerminal({ cwd: item.repoPath }).show();
+    }),
+    vscode.commands.registerCommand('flowAutomate.mr2prod', async (item: GitRepoItem) => {
+      vscode.window.showInformationMessage('Створення MR у prod...');
+      await mergeRequestHandler(MergeTarget.Prod, item.repoPath);
+    }),
+    vscode.commands.registerCommand('flowAutomate.mr2stage', async (item: GitRepoItem) => {
+      await mergeRequestHandler(MergeTarget.Stage, item.repoPath);
+    }),
+    vscode.commands.registerCommand('flowAutomate.runCommand', async (item: CommandItem) => {
+      await item.actionItem.action();
+    }),
+    vscode.commands.registerCommand('flowAutomate.debug', async (item: GitRepoItem) => {
+      await debug();
+    }),
 
-  context.subscriptions.push(createMrProd, createMrStage);
+  ];
+
+  context.subscriptions.push(refreshCmd, ...commands);
+
 }
 
 
-export function deactivate() {}
+export function deactivate() { }
