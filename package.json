@@ -16,6 +16,7 @@
   "engines": {
     "vscode": "^1.70.0"
   },
+  "icon": "media/icon.png",
   "activationEvents": [
     "onStartupFinished"
   ],

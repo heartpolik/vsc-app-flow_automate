@@ -9,6 +9,20 @@ import { GitRepoItem } from './tree/GitRepoItem';
 import { Config } from './Config';
 
 export function activate(context: vscode.ExtensionContext) {
+  const alreadyActivated = context.globalState.get<boolean>('flowAutomateActivated');
+
+  if (!alreadyActivated) {
+    vscode.window.showInformationMessage(
+      'Flow Automate extension has been installed. Reload to apply all features.',
+      'Reload Window'
+    ).then(selection => {
+      if (selection === 'Reload Window') {
+        vscode.commands.executeCommand('workbench.action.reloadWindow');
+      }
+    });
+
+    context.globalState.update('flowAutomateActivated', true);
+  }
   vscode.workspace.onDidChangeConfiguration(event => {
     if (event.affectsConfiguration('flowAutomate')) {
       Config.init();
