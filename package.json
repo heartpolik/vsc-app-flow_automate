@@ -4,6 +4,7 @@
   "description": "VS Code extension для створення MR і посту в Jira",
   "version": "0.0.1",
   "publisher": "hrt-plk",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/heartpolik/vsc-app-flow_automate.git"
