@@ -2,7 +2,7 @@
   "name": "flow-automate",
   "displayName": "Flow automate",
   "description": "VS Code extension для створення MR і посту в Jira",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "hrt-plk",
   "license": "MIT",
   "repository": {
