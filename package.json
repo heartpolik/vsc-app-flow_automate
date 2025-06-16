@@ -24,13 +24,14 @@
   ],
   "main": "./dist/extension.js",
   "scripts": {
-    "vscode:prepublish": "tsc -p ./",
     "pretest": "npm run compile",
     "compile": "tsc",
-    "bundle": "node esbuild.js",
-    "watch": "tsc -w",
     "clean": "rm -rf dist",
-    "test": "node ./out/test/runTest.js"
+    "watch": "tsc -w",
+    "bundle": "node esbuild.js",
+    "bundle:prod": "node esbuild.js --production",
+    "bundle:watch": "node esbuild.js --watch",
+    "vscode:prepublish": "npm run compile && npm run bundle:prod"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
