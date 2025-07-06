@@ -22,7 +22,7 @@ export const actions = {
     },
 
     pullAllProd: {
-        title: 'Оновити увесь прод',
+        title: '[ALPHA] Оновити увесь прод',
         icon: new vscode.ThemeIcon('search-replace-all', new vscode.ThemeColor('problemsWarningIcon.foreground')),
         action: async () => {
             const repos = getAllGitInstances(getAllGitRepositories());

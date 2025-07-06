@@ -4,7 +4,7 @@ import { SimpleGit } from 'simple-git';
 import { GitRepoItem } from './GitRepoItem';
 
 export class GitRepoProvider implements vscode.TreeDataProvider<GitRepoItem> {
-  
+
   private _onDidChangeTreeData: vscode.EventEmitter<GitRepoItem | undefined> = new vscode.EventEmitter();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
@@ -27,7 +27,15 @@ export class GitRepoProvider implements vscode.TreeDataProvider<GitRepoItem> {
         const branch = status.current ?? 'unknown';
         const hasChanges = status.files.length > 0;
 
-        items.push(new GitRepoItem(repoPath, branch, hasChanges, git));
+        const localBranches = await git.branchLocal();
+        const localBranchCount = localBranches.all.length;
+
+        items.push(new GitRepoItem(
+          repoPath,
+          branch,
+          hasChanges,
+          localBranchCount,
+          git));
       } catch (err) {
         console.error('Git error for', repoPath, err);
       }

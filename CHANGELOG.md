@@ -11,3 +11,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [0.0.6]
 
 - Fixed bundler and dependencies
+
+## [0.1.0]
+
+- Added jira field name config
+- Added branch autopush config flag
+- Added local branch counter

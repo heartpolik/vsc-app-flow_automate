@@ -28,6 +28,7 @@ export async function createMergeRequest(repo: SimpleGit, targetBranch: string, 
   const remoteBranches = await repo.branch(['-r']);
   const remoteBranchFullName = `origin/${currentBranch}`;
   if (!remoteBranches.all.includes(remoteBranchFullName)) {
+    if (!Config.read.gitlabAutoPush) throw new Error('Спочатку запуште локальну гілку!');
     const confirm = await vscode.window.showWarningMessage(
       `Гілка '${currentBranch}' ще не запушена. Запушити зараз?`,
       'Так', 'Скасувати'

@@ -5,12 +5,11 @@
 ## ✨ Features
 
 - 🔀 Create GitLab Merge Requests from your current branch with a single command
-- 🚀 Automatically push local branches before creating MRs
-- 🔄 Update `prod` branches across multiple repositories
+- 🚀 (Option) Automatically push local branch before creating MRs
 - 🧠 Detect project info and branch configuration from workspace
 - 📝 Automatically update the **Implementation Details** section in Jira issues with MR links
-- 📋 Organize Merge Requests grouped by Jira issue
-- 🧰 Command-based architecture for maximum flexibility
+<!-- - 🔄 Update `prod` branches across multiple repositories -->
+
 
 ## ⚙️ Configuration
 
@@ -19,11 +18,13 @@ Set extension settings in `settings.json` or via the VS Code Settings UI:
 ```json
 "flowAutomate.gitlabUrl": "https://gitlab.com",
 "flowAutomate.gitlabToken": "<your-gitlab-token>",
+"flowAutomate.gitlabAutoPush": false,
 "flowAutomate.branchProd": "prod",
 "flowAutomate.branchStage": "stage",
 "flowAutomate.jiraUrl": "https://yourcompany.atlassian.net",
 "flowAutomate.jiraEmail": "<your-email>",
 "flowAutomate.jiraToken": "<your-jira-api-token>"
+"flowAutomate.jiraSectionName": "description"
 ```
 #### 🧪 Beta
 

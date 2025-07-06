@@ -109,6 +109,11 @@
           "description": "GitLab Private Token",
           "secret": true
         },
+        "flowAutomate.gitlabAutoPush": {
+          "type": "boolean",
+          "default": false,
+          "description": "Автоматично запушити гілку перед мердж-реквестом, якщо вона відсутня"
+        },
         "flowAutomate.branchProd": {
           "type": "string",
           "default": "prod",
@@ -137,9 +142,8 @@
         },
         "flowAutomate.jiraSectionName": {
           "type": "string",
-          "default": "🔧 Деталі реалізації",
-          "description": "Назва для розділу в задачі",
-          "secret": true
+          "default": "description",
+          "description": "Назва поля в картці, куди будуть додаватись коміти"
         }
       }
     },
@@ -159,10 +163,6 @@
       {
         "command": "flowAutomate.mr2stage",
         "title": "📗 MR -> stage"
-      },
-      {
-        "command": "flowAutomate.debug",
-        "title": "🪲 debug"
       },
       {
         "command": "flowAutomate.runCommand",

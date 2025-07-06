@@ -64,28 +64,18 @@ export async function postToJira(issueKey: string | null, mrUrl: string): Promis
 }
 
 function mergeMrIntoJiraAdfDescription(adf: any, repoName: string, mrUrl: string): any {
-  const sectionTitle = 'Деталі реалізації';
   const repoHeaderText = repoName;
-  const mrLinkText = mrUrl;
-
+  const sectionTitle = "Merge requests 🔀";
   const sectionHeading = {
     type: 'heading',
     attrs: { level: 3 },
     content: [{ type: 'text', text: sectionTitle }]
   };
 
-  const repoHeading = {
-    type: 'paragraph',
-    content: [{ type: 'text', text: repoHeaderText, marks: [{ type: 'strong' }] }]
-  };
-
   const mrItem = {
     type: 'paragraph',
     content: [
-      {
-        type: 'text',
-        text: '- ',
-      },
+      { type: 'text', text: `${repoHeaderText} `, marks: [{ type: 'strong' }] },
       {
         type: 'text',
         text: mrUrl,
@@ -107,7 +97,7 @@ function mergeMrIntoJiraAdfDescription(adf: any, repoName: string, mrUrl: string
     // Додаємо нову секцію
     return {
       ...adf,
-      content: [...content, sectionHeading, repoHeading, mrItem]
+      content: [...content, sectionHeading, mrItem]
     };
   }
 
@@ -148,7 +138,7 @@ function mergeMrIntoJiraAdfDescription(adf: any, repoName: string, mrUrl: string
 
   if (repoHeaderIndex === -1) {
     // Додати новий блок для репо
-    updated.splice(insertIndex, 0, repoHeading, mrItem);
+    updated.splice(insertIndex, 0, mrItem);
   } else {
     // Вставити MR після repoHeader
     let i = repoHeaderIndex + 1;
@@ -165,7 +155,7 @@ function mergeMrIntoJiraAdfDescription(adf: any, repoName: string, mrUrl: string
 }
 
 export async function addMrToJiraIssue(issueKey: string, repoName: string, mrUrl: string) {
-  const section = `### ${Config.read.jiraSectionName}`;
+  const section = Config.read.jiraSectionName;
   const url = `${Config.read.jiraUrl}/rest/api/3/issue/${issueKey}`;
 
   const authHeaders = {
@@ -175,13 +165,17 @@ export async function addMrToJiraIssue(issueKey: string, repoName: string, mrUrl
   };
 
   const issueResponse = await axios.get(url, { headers: authHeaders });
-  const adfDoc = issueResponse.data.fields.description;
+  const adfDoc = issueResponse.data.fields[section];
+
+  if (!adfDoc) throw new Error(`Section ${section} does not exists. Contact to your Jira administrator`);
+
   const updatedAdf = mergeMrIntoJiraAdfDescription(adfDoc, repoName, mrUrl);
 
+  const fields: any = {};
+  fields[section] = updatedAdf;
+
   await axios.put(url, {
-    fields: {
-      description: updatedAdf
-    }
+    fields
   }, { headers: authHeaders });
 
   vscode.window.showInformationMessage(`Додано MR до задачі ${issueKey}`);

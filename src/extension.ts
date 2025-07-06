@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
   const commands = [
     vscode.commands.registerCommand('flowAutomate.refreshRepo', (item: GitRepoItem) => {
       vscode.window.showInformationMessage(`Оновлення репо: ${item.repoPath}`);
-      // TODO: refresh logic
+      repoProvider.refresh();
     }),
     vscode.commands.registerCommand('flowAutomate.openInTerminal', (item: GitRepoItem) => {
       vscode.window.createTerminal({ cwd: item.repoPath }).show();

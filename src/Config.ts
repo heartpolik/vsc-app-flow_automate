@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 export interface FlowAutomateConfig {
     gitlabUrl: string;
     gitlabToken: string;
+    gitlabAutoPush: boolean;
     branchProd: string;
     branchStage: string;
     jiraUrl: string;
@@ -27,6 +28,7 @@ export class Config {
         this.currentConfig = {
             gitlabUrl: cfg.get<string>('gitlabUrl') || '',
             gitlabToken: cfg.get<string>('gitlabToken') || '',
+            gitlabAutoPush: cfg.get<boolean>('gitlabAutoPush') || false,
             branchProd: cfg.get<string>('branchProd') || '',
             branchStage: cfg.get<string>('branchStage') || '',
             jiraUrl: cfg.get<string>('jiraUrl') || '',
